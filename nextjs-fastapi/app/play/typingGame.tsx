@@ -41,7 +41,7 @@ const SpeedTypingGame = () => {
     };
     const handleKeyDown = (event: React.KeyboardEvent) => {
         const characters = document.querySelectorAll('.char')
-        if (event.key === "Backspace" && charIndex > 0 &&
+        if (event.key === "Backspace" && charIndex > 0 && 
             charIndex < characters.length && timeLeft > 0) {
                 if (characters[charIndex - 1].classList.contains('correct')) {
                     characters[charIndex - 1].classList.remove('correct')
