@@ -12,6 +12,7 @@ const SpeedTypingGame = () => {
         `It is the blossom of a plant. A flower is the part of a plant that produces seeds, which eventually become other flowers. They are the reproductive system of a plant. Most flowers consist of 04 main parts that are sepals, petals, stamens, and carpels. The female portion of the flower is the carpels.The majority of flowers are hermaphrodites, meaning they have both male and female components. Others may consist of one of two parts and may be male or female.`,
         `An aunt is a bassoon from the right perspective. As far as we can estimate, some posit the melic myanmar to be less than kutcha. One cannot separate foods from blowzy bows. The scampish closet reveals itself as a sclerous llama to those who look. A hip is the skirt of a peak.Some hempy laundries are thought of simply as orchids.A gum is a trumpet from the right perspective. A freebie flight is a wrench of the mind. Some posit the croupy.`
     ]
+    const [songData, setSongData] = useState<any>(null)
 
     const [typingText, setTypingText] = useState<JSX.Element[]>([])
     const [inpFieldValue, setInpFieldValue] = useState('')
@@ -20,8 +21,12 @@ const SpeedTypingGame = () => {
     const [charIndex, setCharIndex] = useState(0)
     const [mistakes, setMistakes] = useState(0)
     const [isTyping, setIsTyping] = useState(false)
+    const [lineIndex, setLineIndex] = useState(0)
     const [WPM, setWPM] = useState(0)
     const [CPM, setCPM] = useState(0)
+    const [startTime, setStartTime] = useState(0)
+    const [started, setStarted] = useState(false)
+    const [time, setTime] = useState(0)
 
     const loadParagraph = () => {
         const ranIndex = Math.floor(Math.random() * paragraphs.length);
@@ -38,7 +43,28 @@ const SpeedTypingGame = () => {
         setCharIndex(0)
         setMistakes(0)
         setIsTyping(false)
-    };
+    }
+
+    const loadLine = () => {
+        const inputField = document.getElementsByClassName('input-field')[0]
+        document.addEventListener("keydown", () =>  (inputField as HTMLElement)?.focus())
+        const content = Array.from((songData.Content.lyrics[lineIndex].words as String)).map((letter, index) =>
+            (<span key={index}
+                style={{color: (letter !== ' ') ? 'black' : 'transparent'}}
+                className={`char ${index === 0 ? 'active' : ''}`}> 
+                {(letter !== ' ') ? letter : '_'} 
+            </span>))
+        const characters = document.querySelectorAll('.char')
+        characters.forEach(span => {
+            span.classList.remove("correct")
+            span.classList.remove("wrong")
+            span.classList.remove("active")
+        })
+        setTypingText(content)
+        
+        
+    }
+
     const handleKeyDown = (event: React.KeyboardEvent) => {
         const characters = document.querySelectorAll('.char')
         if (event.key === "Backspace" && charIndex > 0 && 
@@ -65,7 +91,7 @@ const SpeedTypingGame = () => {
     const initTyping = (event: any) => {
         const characters = document.querySelectorAll('.char')
         let typedChar = (event.target as HTMLTextAreaElement)?.value
-        if (charIndex < characters.length && timeLeft > 0) {
+        if (charIndex < characters.length && timeLeft > 0 && songData !== null) {
             let currentChar = (characters[charIndex] as HTMLElement)?.innerText;
             if (currentChar === '_') currentChar = ' '
             if (!isTyping) {
@@ -73,10 +99,12 @@ const SpeedTypingGame = () => {
             }
             if (typedChar === currentChar) {
                 setCharIndex(charIndex + 1)
-                if (charIndex + 1 < characters.length) {
-                    characters[charIndex + 1].classList.add('active')
-                    characters[charIndex].classList.remove('active')
+                if (charIndex < characters.length) {
+                    if (charIndex + 1 < characters.length) {
+                        characters[charIndex + 1].classList.add('active')
+                    }
                     characters[charIndex].classList.add('correct')
+                    characters[charIndex].classList.remove('active')
                 }
             }
             else {
@@ -88,7 +116,8 @@ const SpeedTypingGame = () => {
                     characters[charIndex].classList.add('wrong')
                 }
             }
-            if (charIndex === characters.length - 1) {
+            if (charIndex === characters.length - 1 && Date.now() - startTime > Number(songData.Content.duration)) {
+                console.log("finished")
                 setIsTyping(false)
             }
 
@@ -123,10 +152,58 @@ const SpeedTypingGame = () => {
         loadParagraph()
     }
 
-    useEffect(() => {
-        loadParagraph();
-    }, [])
+    //useEffect(() => {
+    //    loadParagraph();
+    //}, [])
 
+    const fetchSong = async (url: String) => {
+        const result = await fetch(`http://127.0.0.1:8000/api/py/get-song-url?url=${url}`)
+        return result.json().then(json => {
+            setSongData(json)
+            console.log(json)
+        })
+    }
+
+    const startGame = () => {
+        setStarted(true)
+        setStartTime(Date.now())
+        loadLine()
+        
+    }
+
+    useEffect(() => {
+        if (songData !== null) {
+            let interval = setInterval(() => {
+                setTime(Date.now() - startTime)
+                if ((Date.now() - startTime) >= songData.Content.duration) {
+                    clearInterval(interval)
+                    endGame()
+                }
+                else if (lineIndex < songData.Content.lyrics.length - 2) {
+                    if ((Date.now() - startTime) >= Number(songData.Content.lyrics[lineIndex + 1].startTimeMs)) {
+                        setLineIndex(lineIndex + 1)
+                        setInpFieldValue('')
+                        setCharIndex(0)
+                        setIsTyping(false)
+                        clearInterval(interval)
+                    }
+                }
+            }, 10)
+        }
+        
+    }, [startTime, lineIndex])
+
+    useEffect(() => {
+        if (songData !== null) {
+            loadLine()           
+        }
+    }, [lineIndex])
+
+    const endGame = () => {
+
+    }
+
+    
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined
         if (isTyping && timeLeft > 0) {
@@ -148,9 +225,17 @@ const SpeedTypingGame = () => {
             clearInterval(interval)
         }
     }, [isTyping, timeLeft])
+    
 
     return (
-        <div className="container">
+        <>
+        <div className="song-search">
+            <label form="song-url">Song URL</label>
+            <input type="text" id="song-url"></input>
+            <button className="bg-blue-400" onClick={() => {fetchSong(((document.getElementById("song-url") as HTMLInputElement).value))}}>Search</button>
+        </div>
+        {(songData && !songData.Error)? <>
+            <div className="container">
             <input type="text"
             className="input-field"
             value={inpFieldValue}
@@ -165,8 +250,12 @@ const SpeedTypingGame = () => {
             initTyping={initTyping}
             handleKeyDown={handleKeyDown}
             resetGame={resetGame}/>
-
         </div>
+        </> : <></>}
+        <button onClick={startGame}>Start</button>
+        <p>{time}</p>
+        </>
+        
     )
 }
 
