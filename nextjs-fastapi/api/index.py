@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from lrcparser import *
 import os
@@ -8,13 +8,17 @@ import time
 import pprint
 import pymongo
 import requests
+import base64
 
 load_dotenv()
 db_url = os.getenv("DB_URL")
+client_id = os.getenv("SPOTIFY_CLIENT_ID")
+client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+SP_DC = os.getenv("SP_DC")
+
 client = pymongo.MongoClient(db_url, connect=False)
 db = client["rhythmtype"]
 
-SP_DC = os.getenv("SP_DC")
 sp = Spotify(SP_DC)
 
 ### Create FastAPI instance with custom docs and openapi url
@@ -31,8 +35,6 @@ app.add_middleware(
 # Query songs by name
 
 def get_spotify_bearer():
-    client_id = os.getenv("SPOTIFY_CLIENT_ID")
-    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
     headers = {"content-type": "application/x-www-form-urlencoded"}
     payload = {
         "grant_type": "client_credentials",
@@ -64,10 +66,13 @@ def new_song_data(id: str):
     duration = res.json()["duration_ms"]
     return {"song_id": id, "name": name, "artists": artists, "duration": duration}
 
-
 @app.get("/api/py/helloFastApi")
 def hello_fast_api():
     return {"message": "Hello from FastAPI"}
+
+@app.get("/api/py/get-bearer-token")
+def get_bearer_token():
+    return bearer_token
 
 @app.get("/api/py/get-song-url")
 async def get_song_data(url: str):
@@ -101,3 +106,25 @@ async def get_song_data_title(title: str):
     for s in songs:
         res.append(s)
     return {"Error": False, "Content": res}
+
+@app.get("/api/py/spotify-callback")
+def get_access_token(req: Request):
+    params = req.query_params
+    if "error" in params:
+        return {"Error": True, "Message": "Could not authenticate with Spotify"}
+    body = {
+        "grant_type": "authorization_code",
+        "code": params["code"],
+        "redirect_uri": "http://localhost:3000/play"
+    }
+    headers = {
+        "content-type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic " + base64.b64encode((client_id + ":" + client_secret).encode("utf-8")).decode("utf-8")
+    }
+    res = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=body).json()
+    return res
+    return {
+        "Error": False,
+        "access_token": res["access_token"],
+        "expires_in": res["expires_in"],
+    }
