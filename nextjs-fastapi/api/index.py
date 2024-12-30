@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from lrcparser import *
+from fastapi.responses import JSONResponse
 import os
 from syrics.api import Spotify
 from dotenv import load_dotenv
@@ -9,6 +9,8 @@ import pprint
 import pymongo
 import requests
 import base64
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 db_url = os.getenv("DB_URL")
@@ -79,7 +81,7 @@ async def get_song_data(url: str):
     songs_col = db["song_data"]
     song_id = url.split("open.spotify.com/track/")
     if len(song_id) < 2:
-        return {"Error": True, "Message": "Invalid URL"}
+        return JSONResponse(status_code=403, content={"Error": True, "Message": "Invalid URL"})
     else:
         song_id = song_id[1].split("?si=")[0]
     song = songs_col.find_one({"song_id": song_id}, {'_id': 0})
@@ -87,7 +89,7 @@ async def get_song_data(url: str):
     if not song:
         new_song_lyrics = sp.get_lyrics(song_id)
         if not new_song_lyrics:
-            return {"Error": True, "Message": "Song does not exist."}
+            return JSONResponse(status_code=404, content={"Error": True, "Message": "Song not found"})
         new_song_lyrics = new_song_lyrics["lyrics"]["lines"]
         new_song = new_song_data(song_id)
         new_song["lyrics"] = new_song_lyrics
@@ -95,7 +97,7 @@ async def get_song_data(url: str):
         songs_col.insert_one(song)
 
     song.pop("_id", None)
-    return {"Error": False, "Content": song} if song else {"Error": True, "Message": "Song not found"}
+    return {"Error": False, "Content": song} if song else JSONResponse(status_code=404, content={"Error": True, "Message": "Song not found"})
 
 @app.get("/api/py/get-song-title")
 async def get_song_data_title(title: str):
@@ -107,24 +109,47 @@ async def get_song_data_title(title: str):
         res.append(s)
     return {"Error": False, "Content": res}
 
-@app.get("/api/py/spotify-callback")
-def get_access_token(req: Request):
-    params = req.query_params
-    if "error" in params:
-        return {"Error": True, "Message": "Could not authenticate with Spotify"}
+
+@app.get("/api/py/get-access-token")
+def get_access_token(code: str):
     body = {
         "grant_type": "authorization_code",
-        "code": params["code"],
+        "code": code,
         "redirect_uri": "http://localhost:3000/play"
     }
+    auth_header = base64.urlsafe_b64encode((client_id + ":" + client_secret).encode())
     headers = {
         "content-type": "application/x-www-form-urlencoded",
-        "Authorization": "Basic " + base64.b64encode((client_id + ":" + client_secret).encode("utf-8")).decode("utf-8")
+        "Authorization": 'Basic %s' % auth_header.decode('ascii')
     }
     res = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=body).json()
-    return res
-    return {
-        "Error": False,
-        "access_token": res["access_token"],
-        "expires_in": res["expires_in"],
-    }
+    if "access_token" in res:
+        return {
+            "Error": False,
+            "Content": {
+                "access_token": res["access_token"],
+                "expires_in": res["expires_in"],
+            }
+        }
+    else:
+        return JSONResponse(status_code=400, content={
+            "Error": True,
+            "Message": "Invalid code"
+        })
+    
+"""
+@app.get("/api/py/get-access-token")
+def get_access_token(auth_code: str):
+    response = requests.post(
+        "https://accounts.spotify.com/api/token",
+        data={
+            "grant_type": "authorization_code",
+            "code": auth_code,
+            "redirect_uri": "http://localhost:3000/play",
+        },
+        auth=(client_id, client_secret),
+    )
+    #return response.json()
+    access_token = response.json()["access_token"]
+    return {"Authorization": "Bearer " + access_token}
+"""

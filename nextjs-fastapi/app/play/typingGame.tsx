@@ -25,11 +25,13 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
     const [started, setStarted] = useState(false)
     const [time, setTime] = useState(0)
 
-    
+    const focus = () => {
+        const inputField = document.getElementsByClassName('input-field')[0];
+        (inputField as HTMLElement)?.focus()
+    }
 
     const loadLine = () => {
-        const inputField = document.getElementsByClassName('input-field')[0]
-        document.addEventListener("keydown", () =>  (inputField as HTMLElement)?.focus())
+        document.addEventListener("keydown", focus)
         const content = Array.from((songData.Content.lyrics[lineIndex].words as String)).map((letter, index) =>
             (<span key={index}
                 style={{color: (letter !== ' ') ? 'black' : 'transparent'}}
@@ -181,9 +183,13 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
     }, [lineIndex])
 
     const endGame = () => {
-
+        document.removeEventListener("keydown", focus)
     }
 
+    const urlToUri = (url: string) => {
+        let id = url.split("/track/")[1].split("?si=")[0]
+        return `spotify:track:${id}`
+    }
     
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined
@@ -232,7 +238,7 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
             handleKeyDown={handleKeyDown}
             resetGame={resetGame}/>
             </div>
-            <SongPlayer trackUri={(document.getElementById("song-url") as HTMLInputElement).value} />
+            <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} accessToken={code} playing={started}/>
         </> : <></>}
         <button onClick={startGame}>Start</button>
         <p>{time}</p>
