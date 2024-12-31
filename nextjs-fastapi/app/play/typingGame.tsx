@@ -24,6 +24,7 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
     const [startTime, setStartTime] = useState(0)
     const [started, setStarted] = useState(false)
     const [time, setTime] = useState(0)
+    const [endTime, setEndTime] = useState(0)
 
     const focus = () => {
         const inputField = document.getElementsByClassName('input-field')[0];
@@ -75,7 +76,7 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
     const initTyping = (event: any) => {
         const characters = document.querySelectorAll('.char')
         let typedChar = (event.target as HTMLTextAreaElement)?.value
-        if (charIndex < characters.length && timeLeft > 0 && songData !== null) {
+        if (charIndex < characters.length && time < endTime && songData !== null) {
             let currentChar = (characters[charIndex] as HTMLElement)?.innerText;
             if (currentChar === '_') currentChar = ' '
             if (!isTyping) {
@@ -114,6 +115,11 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
             setCPM(parseInt(String(cpm), 10))
         }
         else {
+            console.log("setting is typing to false")
+            console.log(charIndex)
+            console.log(characters.length)
+            console.log(timeLeft)
+            console.log(songData)
             setIsTyping(false)
         }
     }
@@ -144,6 +150,9 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
         return result.json().then(json => {
             setSongData(json)
             console.log(json)
+            if (json["Error"] == false) {
+                setEndTime(json["Content"]["duration"])
+            }
         })
     }
 
@@ -193,9 +202,9 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
     
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined
-        if (isTyping && timeLeft > 0) {
+        if (isTyping && (maxTime - time) > 0) {
             interval = setInterval(() => {
-                setTimeLeft(timeLeft - 1)
+                setTimeLeft(Math.floor((endTime - time) / 1000))
                 let cpm = (charIndex - mistakes * (60 / (maxTime - timeLeft)))
                 cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
                 setCPM(parseInt(String(cpm), 10))
