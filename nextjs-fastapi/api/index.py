@@ -90,9 +90,18 @@ async def get_song_data(url: str):
         new_song_lyrics = sp.get_lyrics(song_id)
         if not new_song_lyrics:
             return JSONResponse(status_code=404, content={"Error": True, "Message": "Song not found"})
+        offset = 150
         new_song_lyrics = new_song_lyrics["lyrics"]["lines"]
+        for lyric in new_song_lyrics:
+            lyric["startTimeMs"] = str(int(lyric["startTimeMs"]) + offset)
+        blank_lyrics = {"startTimeMs": "0",
+                        "words": "♪",
+                        "syllables": [],
+                        "endTimeMs": "0"}
+        new_song_lyrics.insert(0, blank_lyrics)
         new_song = new_song_data(song_id)
         new_song["lyrics"] = new_song_lyrics
+        new_song["duration"] = str(int(new_song["duration"] + offset))
         song = new_song
         songs_col.insert_one(song)
 

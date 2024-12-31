@@ -64,10 +64,10 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
                 characters[charIndex].classList.remove('active')
                 characters[charIndex - 1].classList.add('active')
                 setCharIndex(charIndex - 1)
-                let cpm = (charIndex - mistakes - 1) * (60 / (maxTime - timeLeft))
+                let cpm = (charIndex - mistakes - 1) * (60 / ((endTime - time) / 1000))
                 cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
                 setCPM(parseInt(String(cpm), 10))
-                let wpm = Math.round(((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60)
+                let wpm = Math.round(((charIndex - mistakes) / 5) / ((endTime - time) / 1000) * 60)
                 wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm
                 setWPM(wpm)
             }
@@ -106,11 +106,11 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
                 setIsTyping(false)
             }
 
-            let wpm = Math.round((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60
+            let wpm = Math.round((charIndex - mistakes) / 5) / ((endTime - time) / 1000) * 60
             wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm
             setWPM(wpm)
 
-            let cpm = (charIndex - mistakes) * (60 / (maxTime - timeLeft))
+            let cpm = (charIndex - mistakes) * (60 / ((endTime - time) / 1000))
             cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
             setCPM(parseInt(String(cpm), 10))
         }
@@ -205,10 +205,10 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
         if (isTyping && (maxTime - time) > 0) {
             interval = setInterval(() => {
                 setTimeLeft(Math.floor((endTime - time) / 1000))
-                let cpm = (charIndex - mistakes * (60 / (maxTime - timeLeft)))
+                let cpm = (charIndex - mistakes * (60 / ((endTime - time) / 1000)))
                 cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
                 setCPM(parseInt(String(cpm), 10))
-                let wpm = Math.round(((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60)
+                let wpm = Math.round(((charIndex - mistakes) / 5) / ((endTime - time) / 1000) * 60)
                 wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm
                 setWPM(wpm)
             }, 1000)
@@ -239,7 +239,7 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
             onKeyDown={handleKeyDown}/>
             <TypingArea typingText={typingText}
             inpFieldValue={inpFieldValue}
-            timeLeft={timeLeft}
+            timeLeft={Math.round((endTime - time) / 1000)}
             mistakes={mistakes}
             WPM={WPM}
             CPM={CPM}
