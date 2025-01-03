@@ -8,8 +8,8 @@ const AUTH_URL = 'https://accounts.spotify.com/authorize?' +
 
 export default function Login() {
   return (
-    <div>
-      <a href={AUTH_URL}>Login With Spotify</a>
+    <div >
+      <a href={AUTH_URL}>Login With Spotify to Begin</a>
     </div>
   )
 }

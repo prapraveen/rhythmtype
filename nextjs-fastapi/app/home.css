@@ -1,0 +1,15 @@
+.site-banner-title-gradient {
+    background: linear-gradient(90deg, rgb(159, 53, 159), rgb(130, 39, 130));
+    background-clip: text;
+    color: transparent;
+    line-height: 1.3em;
+}
+
+.site-banner-title {
+    color: rgb(0, 78, 100);
+}
+
+.container {
+    background: rgb(159, 216, 203);
+    max-width: 1920px;
+}

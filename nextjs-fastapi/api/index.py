@@ -132,19 +132,17 @@ def get_access_token(code: str):
         "Authorization": 'Basic %s' % auth_header.decode('ascii')
     }
     res = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=body).json()
-    if "access_token" in res:
-        return {
-            "Error": False,
-            "Content": {
-                "access_token": res["access_token"],
-                "expires_in": res["expires_in"],
-            }
-        }
-    else:
-        return JSONResponse(status_code=400, content={
-            "Error": True,
-            "Message": "Invalid code"
-        })
+    if "error" in res:
+        return JSONResponse(status_code=400, content=res)
+    
+    user_headers = {"Authorization": "Bearer " + res["access_token"]}
+    user_info = requests.get("https://api.spotify.com/v1/me", headers=user_headers).json()
+    res["user_info"] = user_info
+    res["expires_at"] = int(time.time() * 1000) + res["expires_in"] * 1000
+    return res
+
+
+    
     
 """
 @app.get("/api/py/get-access-token")

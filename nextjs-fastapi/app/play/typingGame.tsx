@@ -7,8 +7,7 @@ import SongPlayer from "./songPlayer"
 import Login from "./Login"
 import useAuth from "./useAuth"
 
-const SpeedTypingGame = ({ code }: {code: string}) => {
-    const accessToken = useAuth(code)
+const SpeedTypingGame = () => {
 
     const [songData, setSongData] = useState<any>(null)
     const [typingText, setTypingText] = useState<JSX.Element[]>([])
@@ -247,7 +246,7 @@ const SpeedTypingGame = ({ code }: {code: string}) => {
             handleKeyDown={handleKeyDown}
             resetGame={resetGame}/>
             </div>
-            <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} accessToken={code} playing={started}/>
+            <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>
         </> : <></>}
         <button onClick={startGame}>Start</button>
         <p>{time}</p>
