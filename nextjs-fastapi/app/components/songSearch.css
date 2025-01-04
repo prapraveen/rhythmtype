@@ -1,0 +1,7 @@
+.search-button {
+    background-color: rgb(0, 78, 100);
+}
+
+input::placeholder {
+    color: rgb(166, 174, 187)
+}

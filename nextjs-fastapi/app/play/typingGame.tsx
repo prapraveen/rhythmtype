@@ -157,7 +157,7 @@ const SpeedTypingGame = () => {
 
     const startGame = () => {
         setStarted(true)
-        setStartTime(Date.now())
+        setStartTime(Date.now() + 500)
         loadLine()
         
     }
@@ -246,7 +246,7 @@ const SpeedTypingGame = () => {
             handleKeyDown={handleKeyDown}
             resetGame={resetGame}/>
             </div>
-            <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>
+            <iframe width="1" height="1" src={`//www.youtube.com/embed/vysjRahYFz0?autoplay=${(started) ? "1" : "0"}&loop=1&playlist=vysjRahYFz0`} allowFullScreen />
         </> : <></>}
         <button onClick={startGame}>Start</button>
         <p>{time}</p>
@@ -256,3 +256,4 @@ const SpeedTypingGame = () => {
 }
 
 export default SpeedTypingGame
+//             <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>

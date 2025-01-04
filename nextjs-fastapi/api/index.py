@@ -11,6 +11,7 @@ import requests
 import base64
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from youtube_search import YoutubeSearch
 
 load_dotenv()
 db_url = os.getenv("DB_URL")
@@ -87,10 +88,11 @@ async def get_song_data(url: str):
     song = songs_col.find_one({"song_id": song_id}, {'_id': 0})
 
     if not song:
+        # get lyrics
         new_song_lyrics = sp.get_lyrics(song_id)
         if not new_song_lyrics:
             return JSONResponse(status_code=404, content={"Error": True, "Message": "Song not found"})
-        offset = 150
+        offset = 0
         new_song_lyrics = new_song_lyrics["lyrics"]["lines"]
         for lyric in new_song_lyrics:
             lyric["startTimeMs"] = str(int(lyric["startTimeMs"]) + offset)
@@ -102,6 +104,9 @@ async def get_song_data(url: str):
         new_song = new_song_data(song_id)
         new_song["lyrics"] = new_song_lyrics
         new_song["duration"] = str(int(new_song["duration"] + offset))
+
+        # get youtube ID
+        
         song = new_song
         songs_col.insert_one(song)
 
@@ -124,7 +129,7 @@ def get_access_token(code: str):
     body = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://localhost:3000/play"
+        "redirect_uri": "http://localhost:3000/"
     }
     auth_header = base64.urlsafe_b64encode((client_id + ":" + client_secret).encode())
     headers = {
