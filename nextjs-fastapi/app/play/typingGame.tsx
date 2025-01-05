@@ -7,9 +7,8 @@ import SongPlayer from "./songPlayer"
 import Login from "./Login"
 import useAuth from "./useAuth"
 
-const SpeedTypingGame = () => {
+const SpeedTypingGame = ({ songData }: { songData: any}) => {
 
-    const [songData, setSongData] = useState<any>(null)
     const [typingText, setTypingText] = useState<JSX.Element[]>([])
     const [inpFieldValue, setInpFieldValue] = useState('')
     const maxTime = 60
@@ -23,7 +22,10 @@ const SpeedTypingGame = () => {
     const [startTime, setStartTime] = useState(0)
     const [started, setStarted] = useState(false)
     const [time, setTime] = useState(0)
-    const [endTime, setEndTime] = useState(0)
+    const [finished, setFinished] = useState(false)
+
+    const endTime = songData["Content"]["duration"]
+    
 
     const focus = () => {
         const inputField = document.getElementsByClassName('input-field')[0];
@@ -144,16 +146,6 @@ const SpeedTypingGame = () => {
     //    loadParagraph();
     //}, [])
 
-    const fetchSong = async (url: String) => {
-        const result = await fetch(`http://127.0.0.1:8000/api/py/get-song-url?url=${url}`)
-        return result.json().then(json => {
-            setSongData(json)
-            console.log(json)
-            if (json["Error"] == false) {
-                setEndTime(json["Content"]["duration"])
-            }
-        })
-    }
 
     const startGame = () => {
         setStarted(true)
@@ -168,6 +160,7 @@ const SpeedTypingGame = () => {
                 setTime(Date.now() - startTime)
                 if ((Date.now() - startTime) >= songData.Content.duration) {
                     clearInterval(interval)
+                    setFinished(true)
                     endGame()
                 }
                 else if (lineIndex < songData.Content.lyrics.length - 2) {
@@ -192,18 +185,16 @@ const SpeedTypingGame = () => {
 
     const endGame = () => {
         document.removeEventListener("keydown", focus)
+        console.log("ended")
     }
 
-    const urlToUri = (url: string) => {
-        let id = url.split("/track/")[1].split("?si=")[0]
-        return `spotify:track:${id}`
-    }
     
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined
         if (isTyping && (maxTime - time) > 0) {
             interval = setInterval(() => {
-                setTimeLeft(Math.floor((endTime - time) / 1000))
+                //setTimeLeft(Math.floor((endTime - time) / 1000))
+                console.log(timeLeft)
                 let cpm = (charIndex - mistakes * (60 / ((endTime - time) / 1000)))
                 cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
                 setCPM(parseInt(String(cpm), 10))
@@ -215,6 +206,7 @@ const SpeedTypingGame = () => {
         else if (timeLeft === 0) {
             clearInterval(interval)
             setIsTyping(false)
+            console.log("here")
         }
         return () => {
             clearInterval(interval)
@@ -224,13 +216,8 @@ const SpeedTypingGame = () => {
 
     return (
         <>
-        <div className="song-search">
-            <label form="song-url">Song URL</label>
-            <input type="text" id="song-url"></input>
-            <button className="bg-blue-400" onClick={() => {fetchSong(((document.getElementById("song-url") as HTMLInputElement).value))}}>Search</button>
-        </div>
-        {(songData && !songData.Error)? <>
-            <div className="container">
+        
+            <div className="game-container">
             <input type="text"
             className="input-field"
             value={inpFieldValue}
@@ -246,8 +233,9 @@ const SpeedTypingGame = () => {
             handleKeyDown={handleKeyDown}
             resetGame={resetGame}/>
             </div>
-            <iframe width="1" height="1" src={`//www.youtube.com/embed/vysjRahYFz0?autoplay=${(started) ? "1" : "0"}&loop=1&playlist=vysjRahYFz0`} allowFullScreen />
-        </> : <></>}
+            {(started && (Date.now() - startTime) < songData.Content.duration) ? 
+            <iframe width="1" height="1" src={`//www.youtube.com/embed/${songData["Content"]["yt_id"]}?autoplay=1&loop=1&playlist=${songData["Content"]["yt_id"]}`} allowFullScreen /> :
+            <></>}
         <button onClick={startGame}>Start</button>
         <p>{time}</p>
         </>
@@ -255,5 +243,5 @@ const SpeedTypingGame = () => {
     )
 }
 
-export default SpeedTypingGame
 //             <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>
+export default SpeedTypingGame

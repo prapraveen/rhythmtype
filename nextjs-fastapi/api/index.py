@@ -65,7 +65,7 @@ def new_song_data(id: str):
         else:
             return None
     name = res.json()["name"]
-    artists = [i["name"] for i in res.json()["artists"]]
+    artists = [i["name"] for i in res.json()["artists"]][:3]
     duration = res.json()["duration_ms"]
     return {"song_id": id, "name": name, "artists": artists, "duration": duration}
 
@@ -77,14 +77,10 @@ def hello_fast_api():
 def get_bearer_token():
     return bearer_token
 
-@app.get("/api/py/get-song-url")
-async def get_song_data(url: str):
+@app.get("/api/py/get-song-data")
+async def get_song_data(song_id: str):
     songs_col = db["song_data"]
-    song_id = url.split("open.spotify.com/track/")
-    if len(song_id) < 2:
-        return JSONResponse(status_code=403, content={"Error": True, "Message": "Invalid URL"})
-    else:
-        song_id = song_id[1].split("?si=")[0]
+
     song = songs_col.find_one({"song_id": song_id}, {'_id': 0})
 
     if not song:
@@ -106,7 +102,15 @@ async def get_song_data(url: str):
         new_song["duration"] = str(int(new_song["duration"] + offset))
 
         # get youtube ID
+        query = new_song["name"]
+        for artist in new_song["artists"]:
+            query += " " + artist
+        yt_results = YoutubeSearch(query, max_results=1).to_dict()
+        if not yt_results:
+            return {"Error": True, "Message": "Music for song could not be found"}
+        yt_id = yt_results[0]["id"]
         
+        new_song["yt_id"] = yt_id
         song = new_song
         songs_col.insert_one(song)
 

@@ -11,7 +11,7 @@ const useUser = () => {
             effectRan.current = true
             const currUser = window.localStorage.getItem("user")
             if (currUser) {
-                const data = JSON.parse(currUser)
+                let data = JSON.parse(currUser)
                 if (Date.now() > data["expires_at"]) {
                     const url = "https://accounts.spotify.com/api/token"
                     const payload = {

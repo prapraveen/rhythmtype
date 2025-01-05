@@ -11,33 +11,33 @@ const AUTH_URL = 'https://accounts.spotify.com/authorize?' +
       redirect_uri: "http://localhost:3000/"}).toString()
 
 export default function Login() {
-  const user = useUser()
-  const effectRan = useRef(false)
+    const user = useUser()
+    const effectRan = useRef(false)
   
-      useEffect(() => {
-          const code = new URLSearchParams(window.location.search).get("code")
-  
-          if ((!user || user == "loading") && !effectRan.current) {
-              if (code) {
-                  fetch(`http://127.0.0.1:8000/api/py/get-access-token?code=${code}`)
-                  .then(res => res.json())
-                  .then(data => {
-                      if (data) {
-                          if (data.error) {
-                              console.log(data.error)
-                          }
-                          else {
-                              window.localStorage.setItem("user", JSON.stringify(data))
-                              window.location.reload()
-                          }
-                      }
-                      
-                  })
-              }
-              
-          }
-          effectRan.current = true;
-      }, [])
+    useEffect(() => {
+        const code = new URLSearchParams(window.location.search).get("code")
+
+        if ((!user || user == "loading") && !effectRan.current) {
+            if (code) {
+                fetch(`http://127.0.0.1:8000/api/py/get-access-token?code=${code}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        if (data.error) {
+                            console.log(data.error)
+                        }
+                        else {
+                            window.localStorage.setItem("user", JSON.stringify(data))
+                            window.location.reload()
+                        }
+                    }
+                    
+                })
+            }
+            
+        }
+        effectRan.current = true;
+    }, [])
   return (
     <div className="text-center login-text text-3xl font-semibold mt-10 bg-white py-5 rounded-full font-mono">
       <a href={AUTH_URL}>Login With Spotify to Begin</a>
