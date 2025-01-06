@@ -30,20 +30,37 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
         (inputField as HTMLElement)?.focus()
     }
 
+    const splitString = (lyric: string) => {
+        let res = []
+        const splitLyric = lyric.split(" ")
+        for (let i = 0; i < splitLyric.length; i++) {
+            res.push(splitLyric[i])
+            res.push(" ")
+        }
+        res.pop()
+        return res
+    }
+
     const loadLine = () => {
         document.addEventListener("keydown", focus)
-        const content = Array.from((songData.Content.lyrics[lineIndex].words as String)).map((letter, index) =>
-            (<span key={index}
-                style={{color: (letter !== ' ') ? 'black' : 'transparent'}}
-                className={`char ${index === 0 ? 'active' : ''}`}> 
-                {(letter !== ' ') ? letter : '_'} 
-            </span>))
         const characters = document.querySelectorAll('.char')
         characters.forEach(span => {
             span.classList.remove("correct")
             span.classList.remove("wrong")
             span.classList.remove("active")
+            
         })
+        const content = splitString((songData.Content.lyrics[lineIndex].words as string)).map((word, index) =>
+            (<div key={index}>
+                {Array.from(word).map((letter, charIndex) => (
+                    <span key={charIndex}
+                    style={{color: (letter !== ' ') ? 'black' : 'transparent'}}
+                    className={`char ${(charIndex === 0 && index === 0) ? 'active' : ''}`}> 
+                    {(letter !== ' ') ? letter : '_'} 
+                    </span>
+                ))}
+            </div>))
+        
         setTypingText(content)
         
         
@@ -231,7 +248,7 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
                 progress={`${charsTyped}/${songData["Content"]["num_chars"]}`}
                 />
             </div>
-            {(started && (Date.now() - startTime) < songData.Content.duration) ? 
+            {(started && (Date.now() - startTime) < songData.Content.duration && (Date.now() - startTime) < songData["Content"]["yt_time"]) ? 
             <iframe width="0" height="0" src={`//www.youtube.com/embed/${songData["Content"]["yt_id"]}?autoplay=1&loop=1&playlist=${songData["Content"]["yt_id"]}`} allowFullScreen /> :
             <></>}
             <div className="buttons flex flex-row justify-between">

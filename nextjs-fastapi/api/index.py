@@ -37,6 +37,17 @@ app.add_middleware(
 # Query song by id
 # Query songs by name
 
+def time_to_seconds(time_str):
+    times = list(map(int, time_str.split(":")))
+    if len(times) == 0:
+        return 0
+    if len(times) == 1:
+        return times[0]
+    if len(times) == 2:
+        return 60 * times[0] + times[1]
+    if len(times) == 3:
+        return 3600 * times[0] + 60 * times[1] + times[0]
+
 def get_spotify_bearer():
     headers = {"content-type": "application/x-www-form-urlencoded"}
     payload = {
@@ -101,7 +112,7 @@ async def get_song_data(song_id: str):
         new_song["lyrics"] = new_song_lyrics
         new_song["duration"] = str(int(new_song["duration"] + offset))
 
-        # get youtube ID
+        # get youtube ID and time
         query = new_song["name"]
         for artist in new_song["artists"]:
             query += " " + artist
@@ -109,14 +120,16 @@ async def get_song_data(song_id: str):
         if not yt_results:
             return {"Error": True, "Message": "Music for song could not be found"}
         yt_id = yt_results[0]["id"]
+        yt_time = yt_results[0]["duration"]
         new_song["yt_id"] = yt_id
+        new_song["yt_time"] = time_to_seconds(yt_time) * 1000
 
         # getting # of characters
         chars = 0
         for lyric in new_song["lyrics"]:
             chars += len(lyric["words"].replace("♪", ""))
         new_song["num_chars"] = chars
-        
+
         song = new_song
         songs_col.insert_one(song)
 

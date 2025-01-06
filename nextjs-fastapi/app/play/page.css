@@ -48,8 +48,14 @@
     padding-top: 0;
   }
   .section1{
-    border-bottom: 1px solid #ced4da;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
   }
+  .section1 div {
+    display: inline;
+  }
+
   span{
     font-size: 40px;
     user-select: none;
