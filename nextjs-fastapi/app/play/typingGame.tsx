@@ -21,6 +21,8 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     const [time, setTime] = useState(0)
     const [finished, setFinished] = useState(false)
     const [charsTyped, setCharsTyped] = useState(0)
+    const [prevText, setPrevText] = useState<JSX.Element[]>([])
+    const [nextText, setNextText] = useState<JSX.Element[]>([])
 
     const endTime = songData["Content"]["duration"]
     
@@ -50,6 +52,7 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
             span.classList.remove("active")
             
         })
+
         const content = splitString((songData.Content.lyrics[lineIndex].words as string)).map((word, index) =>
             (<div key={index}>
                 {Array.from(word).map((letter, charIndex) => (
@@ -62,6 +65,18 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
             </div>))
         
         setTypingText(content)
+
+        const prevContent = songData["Content"]["lyrics"].slice(lineIndex - 1, lineIndex).map((lyric: any, index: number) => (
+            (<p key={index} className="prev-text" >{lyric["words"]}</p>)
+        ))
+        setPrevText(prevContent)
+        console.log(prevContent)
+        const nextContent = songData["Content"]["lyrics"].slice(lineIndex + 1).map((lyric: any, index: number) => (
+            (<p key={index} >{lyric["words"]}</p>)
+        ))
+        setNextText(nextContent)
+        console.log(nextContent)
+
         
         
     }
@@ -97,6 +112,7 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
         let typedChar = (event.target as HTMLTextAreaElement)?.value
         if (charIndex < characters.length && time < endTime && songData !== null) {
             let currentChar = (characters[charIndex] as HTMLElement)?.innerText;
+            if (currentChar === "♪") return
             if (currentChar === '_') currentChar = ' '
             if (!isTyping) {
                 setIsTyping(true)
@@ -180,8 +196,6 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
                 else if (lineIndex < songData.Content.lyrics.length - 2) {
                     if ((Date.now() - startTime) >= Number(songData.Content.lyrics[lineIndex + 1].startTimeMs)) {
                         const missedChars = typingText.length - charIndex;
-                        console.log('Missed chars:', missedChars)
-                        console.log('New total mistakes should be:', mistakes + missedChars)
                         setMistakes(prev => prev + missedChars)
                         setLineIndex(prev => prev + 1)
                         setInpFieldValue('')
@@ -196,7 +210,6 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     }, [startTime, lineIndex])
 
     useEffect(() => {
-        console.log('charIndex updated:', charIndex)
     }, [charIndex])
 
     useEffect(() => {
@@ -207,7 +220,6 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
 
     const endGame = () => {
         document.removeEventListener("keydown", focus)
-        console.log("ended")
     }
 
     
@@ -246,6 +258,8 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
                 <TypingArea typingText={typingText}
                 timeLeft={Math.round((endTime - time) / 1000)}
                 progress={`${charsTyped}/${songData["Content"]["num_chars"]}`}
+                prevText={prevText}
+                nextText={nextText}
                 />
             </div>
             {(started && (Date.now() - startTime) < songData.Content.duration && (Date.now() - startTime) < songData["Content"]["yt_time"]) ? 

@@ -4,14 +4,26 @@ const TypingArea = ({
     typingText,
     timeLeft,
     progress,
+    prevText,
+    nextText
 } : {typingText:JSX.Element[],
     timeLeft:Number,
     progress:String,
+    prevText:JSX.Element[],
+    nextText:JSX.Element[]
 }) => {
     return (
         <div className="section">
             <div className="section1">
-                {typingText}
+                <div className="text-container">
+                    <div className="prev-text-container">
+                        {prevText}
+                    </div>
+                    <div className="current-text">
+                    {typingText}
+                    </div>
+                    {nextText}
+                </div>
             </div>
             <div className="section2">
                 <ul className="resultDetails">
