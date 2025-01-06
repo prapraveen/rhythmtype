@@ -109,8 +109,14 @@ async def get_song_data(song_id: str):
         if not yt_results:
             return {"Error": True, "Message": "Music for song could not be found"}
         yt_id = yt_results[0]["id"]
-        
         new_song["yt_id"] = yt_id
+
+        # getting # of characters
+        chars = 0
+        for lyric in new_song["lyrics"]:
+            chars += len(lyric["words"].replace("♪", ""))
+        new_song["num_chars"] = chars
+        
         song = new_song
         songs_col.insert_one(song)
 

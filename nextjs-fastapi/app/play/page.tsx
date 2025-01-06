@@ -6,6 +6,7 @@ import Login from './Login'
 import './page.css'
 import SpeedTypingGame from './typingGame'
 import { useState, useEffect, useRef } from 'react'
+import SongSearch from '../components/songSearch'
 
 // const code = ""
 
@@ -34,7 +35,8 @@ export default function Home() {
 
 
     return (
-        <div className="App">
+        <div className="App flex flex-col items-center">
+            <SongSearch />
             {(songData) ? <SpeedTypingGame songData={songData}/> :
             <h2>Loading...</h2>}
         </div>

@@ -2,23 +2,11 @@ import { MouseEventHandler } from "react"
 
 const TypingArea = ({
     typingText,
-    inpFieldValue,
     timeLeft,
-    mistakes,
-    WPM,
-    CPM,
-    initTyping,
-    handleKeyDown,
-    resetGame,
+    progress,
 } : {typingText:JSX.Element[],
-    inpFieldValue:String,
     timeLeft:Number,
-    mistakes:Number,
-    WPM:Number,
-    CPM:Number,
-    initTyping:any,
-    handleKeyDown:any,
-    resetGame:MouseEventHandler
+    progress:String,
 }) => {
     return (
         <div className="section">
@@ -33,22 +21,11 @@ const TypingArea = ({
                             <b>{String(timeLeft)}</b>
                         </span>
                     </li>
-                    <li className="mistake">
-                        <p>Mistakes:</p>
-                        <span>{String(mistakes)}</span>
-                    </li>
-                    <li className="wpm">
-                        <p>WPM:</p>
-                        <span>{String(Math.floor(Number(WPM)))}</span>
-                    </li>
-                    <li className="cpm">
-                        <p>CPM:</p>
-                        <span>{String(CPM)}</span>
+                    <li className="Progress">
+                        <p>Progress:</p>
+                        <span>{progress}</span>
                     </li>
                 </ul>
-                <button onClick={resetGame} className="btn">
-                    Try Again
-                </button>
             </div>
         </div>
     )

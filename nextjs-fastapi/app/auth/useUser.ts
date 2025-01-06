@@ -21,7 +21,7 @@ const useUser = () => {
                           },
                         body: new URLSearchParams({
                         grant_type: 'refresh_token',
-                        refresh_token: data["refreshToken"],
+                        refresh_token: data["refresh_token"],
                         }),
                     }
                     fetch(url, payload)
@@ -29,7 +29,7 @@ const useUser = () => {
                     .then(new_data => {
                         data["access_token"] = new_data["access_token"]
                         data["refresh_token"] = new_data["refresh_token"]
-                        data["expires_at"] += new_data["expires_in"] * 1000
+                        data["expires_at"] = Date.now() + new_data["expires_in"] * 1000
                         window.localStorage.setItem("user", JSON.stringify(data))
                     })
                 }

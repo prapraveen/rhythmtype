@@ -1,11 +1,8 @@
 "use client"
 
-import { useState, useEffect, SyntheticEvent } from "react"
+import { useState, useEffect } from "react"
 import './page.css'
 import TypingArea from "./typingArea"
-import SongPlayer from "./songPlayer"
-import Login from "./Login"
-import useAuth from "./useAuth"
 
 const SpeedTypingGame = ({ songData }: { songData: any}) => {
 
@@ -23,6 +20,7 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     const [started, setStarted] = useState(false)
     const [time, setTime] = useState(0)
     const [finished, setFinished] = useState(false)
+    const [charsTyped, setCharsTyped] = useState(0)
 
     const endTime = songData["Content"]["duration"]
     
@@ -54,15 +52,18 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     const handleKeyDown = (event: React.KeyboardEvent) => {
         const characters = document.querySelectorAll('.char')
         if (event.key === "Backspace" && charIndex > 0 && 
-            charIndex < characters.length && timeLeft > 0) {
+            charIndex <= characters.length && timeLeft > 0) {
                 if (characters[charIndex - 1].classList.contains('correct')) {
                     characters[charIndex - 1].classList.remove('correct')
+                    setCharsTyped(charsTyped - 1)
                 }
                 if (characters[charIndex - 1].classList.contains('wrong')) {
                     characters[charIndex - 1].classList.remove('wrong')
                     setMistakes(mistakes - 1)
                 }
-                characters[charIndex].classList.remove('active')
+                if (charIndex < characters.length) {
+                    characters[charIndex].classList.remove('active')
+                }
                 characters[charIndex - 1].classList.add('active')
                 setCharIndex(charIndex - 1)
                 let cpm = (charIndex - mistakes - 1) * (60 / ((endTime - time) / 1000))
@@ -90,22 +91,23 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
                         characters[charIndex + 1].classList.add('active')
                     }
                     characters[charIndex].classList.add('correct')
+                    setCharsTyped(charsTyped + 1)
                     characters[charIndex].classList.remove('active')
                 }
             }
             else {
                 setCharIndex(charIndex + 1);
                 setMistakes(mistakes + 1)
-                characters[charIndex].classList.remove('active')
-                if (charIndex + 1 < characters.length) {
-                    characters[charIndex + 1].classList.add('active')
+                if (charIndex < characters.length) {
+                    if (charIndex + 1 < characters.length) {
+                        characters[charIndex + 1].classList.add('active')
+                    }
                     characters[charIndex].classList.add('wrong')
+                    characters[charIndex].classList.remove('active')
                 }
+                
             }
-            if (charIndex === characters.length - 1 && Date.now() - startTime > Number(songData.Content.duration)) {
-                console.log("finished")
-                setIsTyping(false)
-            }
+            
 
             let wpm = Math.round((charIndex - mistakes) / 5) / ((endTime - time) / 1000) * 60
             wpm = (wpm < 0 || !wpm || wpm === Infinity) ? 0 : wpm
@@ -115,12 +117,7 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
             cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
             setCPM(parseInt(String(cpm), 10))
         }
-        else {
-            console.log("setting is typing to false")
-            console.log(charIndex)
-            console.log(characters.length)
-            console.log(timeLeft)
-            console.log(songData)
+        if (charIndex === characters.length - 1 && Date.now() - startTime > Number(songData.Content.duration)) {
             setIsTyping(false)
         }
     }
@@ -165,7 +162,11 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
                 }
                 else if (lineIndex < songData.Content.lyrics.length - 2) {
                     if ((Date.now() - startTime) >= Number(songData.Content.lyrics[lineIndex + 1].startTimeMs)) {
-                        setLineIndex(lineIndex + 1)
+                        const missedChars = typingText.length - charIndex;
+                        console.log('Missed chars:', missedChars)
+                        console.log('New total mistakes should be:', mistakes + missedChars)
+                        setMistakes(prev => prev + missedChars)
+                        setLineIndex(prev => prev + 1)
                         setInpFieldValue('')
                         setCharIndex(0)
                         setIsTyping(false)
@@ -176,6 +177,10 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
         }
         
     }, [startTime, lineIndex])
+
+    useEffect(() => {
+        console.log('charIndex updated:', charIndex)
+    }, [charIndex])
 
     useEffect(() => {
         if (songData !== null) {
@@ -194,7 +199,6 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
         if (isTyping && (maxTime - time) > 0) {
             interval = setInterval(() => {
                 //setTimeLeft(Math.floor((endTime - time) / 1000))
-                console.log(timeLeft)
                 let cpm = (charIndex - mistakes * (60 / ((endTime - time) / 1000)))
                 cpm = (cpm < 0 || !cpm || cpm === Infinity) ? 0 : cpm
                 setCPM(parseInt(String(cpm), 10))
@@ -206,7 +210,6 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
         else if (timeLeft === 0) {
             clearInterval(interval)
             setIsTyping(false)
-            console.log("here")
         }
         return () => {
             clearInterval(interval)
@@ -215,30 +218,27 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     
 
     return (
-        <>
+        <div className="play-container w-1/2 py-60">
         
-            <div className="game-container">
-            <input type="text"
-            className="input-field"
-            value={inpFieldValue}
-            onChange={initTyping}
-            onKeyDown={handleKeyDown}/>
-            <TypingArea typingText={typingText}
-            inpFieldValue={inpFieldValue}
-            timeLeft={Math.round((endTime - time) / 1000)}
-            mistakes={mistakes}
-            WPM={WPM}
-            CPM={CPM}
-            initTyping={initTyping}
-            handleKeyDown={handleKeyDown}
-            resetGame={resetGame}/>
+            <div className="typing-container w-fit">
+                <input type="text"
+                className="input-field"
+                value={inpFieldValue}
+                onChange={initTyping}
+                onKeyDown={handleKeyDown}/>
+                <TypingArea typingText={typingText}
+                timeLeft={Math.round((endTime - time) / 1000)}
+                progress={`${charsTyped}/${songData["Content"]["num_chars"]}`}
+                />
             </div>
             {(started && (Date.now() - startTime) < songData.Content.duration) ? 
-            <iframe width="1" height="1" src={`//www.youtube.com/embed/${songData["Content"]["yt_id"]}?autoplay=1&loop=1&playlist=${songData["Content"]["yt_id"]}`} allowFullScreen /> :
+            <iframe width="0" height="0" src={`//www.youtube.com/embed/${songData["Content"]["yt_id"]}?autoplay=1&loop=1&playlist=${songData["Content"]["yt_id"]}`} allowFullScreen /> :
             <></>}
-        <button onClick={startGame}>Start</button>
-        <p>{time}</p>
-        </>
+            <div className="buttons flex flex-row justify-between">
+                <button className="btn" onClick={startGame}>Start</button>
+                <button className="btn" onClick={() => console.log("clicked")}>Reset</button>
+            </div>
+        </div>
         
     )
 }

@@ -16,10 +16,12 @@
     background-color: #e7e9e9;
     color: black;
   } */
-  
-.game-container {
-    max-width: 650px;
-    margin: 5px;
+.play-container {
+  margin: auto;
+}
+
+.typing-container {
+    margin: auto;
     width: calc(100% - 10px);
     padding: 30px;
     border-radius: 10px;
@@ -49,7 +51,7 @@
     border-bottom: 1px solid #ced4da;
   }
   span{
-    font-size: 20px;
+    font-size: 40px;
     user-select: none;
     cursor: tex;
     font-family: monospace;
@@ -68,28 +70,20 @@
     border-bottom: 3px solid #0a6bf9;
   }
   
-  .section2{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 5px;
-  }
+
   .section2 ul{
     padding-inline-start: 0px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0px;
+    margin-top: 1rem;
+    margin-left: 0.5rem;
     width: calc(100% - 120px);
   }
   
-  .section2 ul li{
-    list-style-type: none;
-    margin: 0 10px;
-  }
+
   
   .section2 ul li p{
-    margin: 5px;
     font-size: 12px;
   }
   
