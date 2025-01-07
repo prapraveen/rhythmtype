@@ -21,15 +21,13 @@ margin: auto;
 }
 
 .typing-container {
-  margin: auto;
-  width: calc(100% - 10px);
+  margin: 0;
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 0px 0px 10px 10px;
   box-sizing: border-box;
   border: 1px solid #ced4da;
   background: #fff;
-  box-shadow: 0 0 6px rgba(0,0,0,0.25);
-}
+  box-shadow: 0px 8px 10px 0px rgba(0,0,0,0.15);}
 
 input.input-field{
   opacity: 0;
@@ -104,11 +102,11 @@ span.active{
 
 
 .section2 ul li p{
-  font-size: 12px;
+  font-size: 18px;
 }
 
 .section2 ul li span{
-  font-size: 18px;
+  font-size: 27px;
 }
 
 button.btn {
@@ -144,27 +142,6 @@ button.btn:hover{
   }
 }
 
-/* .prev-text, .current-text, .next-text {
-  width: 100%;
-  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-}
-
-.prev-text {
-  transform: translateY(-100%);
-  opacity: 0;
-  position: absolute;
-
-}
-
-.current-text {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.next-text {
-  transform: translateY(100%);
-  opacity: 0.5;
-} */
 .prev-text {
   height: 3.5rem;
   display: flex;

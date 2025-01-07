@@ -3,7 +3,8 @@ import { useRouter } from "next/navigation"
 export default function TrackSearchResult({ track }: {track:any}) {
     const router = useRouter()
 
-    const handlePlay = () => {
+    const handlePlay = (e: any) => {
+        e.preventDefault()
         router.push(`/play/?id=${track.id}`)
     }
 

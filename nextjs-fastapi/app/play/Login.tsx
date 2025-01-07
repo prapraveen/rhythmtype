@@ -39,7 +39,7 @@ export default function Login() {
         effectRan.current = true;
     }, [])
   return (
-    <div className="text-center login-text text-3xl font-semibold mt-10 bg-white py-5 rounded-full font-mono">
+    <div className="text-center login-text text-3xl font-semibold mt-10 bg-white p-5 px-8 rounded-full font-mono">
       <a href={AUTH_URL}>Login With Spotify to Begin</a>
     </div>
   )

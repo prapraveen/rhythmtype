@@ -77,8 +77,14 @@ def new_song_data(id: str):
             return None
     name = res.json()["name"]
     artists = [i["name"] for i in res.json()["artists"]][:3]
+    # get min size album img
+    images = res.json()["album"]["images"]
+    min_img = images[0]
+    for img in images:
+        if img["height"] < min_img["height"]:
+            min_img = img
     duration = res.json()["duration_ms"]
-    return {"song_id": id, "name": name, "artists": artists, "duration": duration}
+    return {"song_id": id, "name": name, "artists": artists, "duration": duration, "image": min_img}
 
 @app.get("/api/py/helloFastApi")
 def hello_fast_api():

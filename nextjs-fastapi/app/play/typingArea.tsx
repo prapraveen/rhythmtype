@@ -7,8 +7,8 @@ const TypingArea = ({
     prevText,
     nextText
 } : {typingText:JSX.Element[],
-    timeLeft:Number,
-    progress:String,
+    timeLeft:number,
+    progress:string,
     prevText:JSX.Element[],
     nextText:JSX.Element[]
 }) => {
@@ -25,19 +25,18 @@ const TypingArea = ({
                     {nextText}
                 </div>
             </div>
-            <div className="section2">
-                <ul className="resultDetails">
-                    <li className="time">
+            <div className="buttons flex flex-row justify-between p-3 pr-5 text-black">
+                    <div className="time">
                         <p>Time Left:</p>
                         <span>
-                            <b>{String(timeLeft)}</b>
+                            <b>{(timeLeft >= 0) ? String(timeLeft) : "-"}</b>
                         </span>
-                    </li>
-                    <li className="Progress">
+                        
+                    </div>
+                    <div className="Progress text-right">
                         <p>Progress:</p>
-                        <span>{progress}</span>
-                    </li>
-                </ul>
+                        <span><b>{progress}</b></span>
+                    </div>
             </div>
         </div>
     )

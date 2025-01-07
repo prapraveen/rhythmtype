@@ -63,14 +63,16 @@ export default function SongSearch() {
     }
 
     return <>
-        <div className="container text-center text-4xl w-1/3 gap-0">
+        <div className="container text-center text-4xl w-1/3 gap-0 flex flex-col" style={{backgroundColor: "transparent"}}>
             <input type="text" 
                 className="font-mono p-3 px-4 rounded-2xl text-center bg-white text-black w-full" style={(searchResults.length > 0) ? {borderRadius: "1rem 1rem 0rem 0rem"} : {}}
                 id="search" 
                 placeholder="Search for Songs" 
                 onChange={handleChange}
+                autoComplete="off"
             />
             {/*<button className="search-button font-mono p-3 px-4 rounded-2xl bg-white text-white" onClick={makeSearch}>Search</button> */}
+            
             <div className="results bg-white py-0" style={{maxHeight: "40vh", overflowY: "scroll"}}>
                 {searchResults.map((track: any) => {
                     return <TrackSearchResult track={track} key={track.uri} />

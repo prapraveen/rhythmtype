@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react"
 import './page.css'
 import TypingArea from "./typingArea"
+import { useRouter } from "next/navigation"
+import SongInfo from "../components/songInfo"
 
 const SpeedTypingGame = ({ songData }: { songData: any}) => {
+    const router = useRouter()
 
     const [typingText, setTypingText] = useState<JSX.Element[]>([])
     const [inpFieldValue, setInpFieldValue] = useState('')
@@ -156,20 +159,27 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     }
 
     const resetGame = () => {
-        setIsTyping(false)
-        setTimeLeft(maxTime)
-        setCharIndex(0)
-        setMistakes(0)
         setTypingText([])
-        setCPM(0)
+        setInpFieldValue("")
+        setTimeLeft(maxTime)
+        setCharIndex
+        setMistakes(0)
+        setIsTyping(false)
+        setLineIndex(0)
         setWPM(0)
+        setCPM(0)
+        setStartTime(0)
+        setStarted(false)
+        setTime(0)
+        setFinished(false)
+        setCharsTyped(0)
+        setNextText([])
         const characters = document.querySelectorAll('.char')
         characters.forEach(span => {
             span.classList.remove("correct")
             span.classList.remove("wrong")
             span.classList.remove("active")
         })
-        characters[0].classList.add("active")
     }
 
     //useEffect(() => {
@@ -247,9 +257,9 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
     
 
     return (
-        <div className="play-container w-1/2 py-60">
-        
-            <div className="typing-container w-fit">
+        <div className="play-container w-1/2 pt-40">
+            <SongInfo songData={songData}/>
+            <div className="typing-container w-full">
                 <input type="text"
                 className="input-field"
                 value={inpFieldValue}
@@ -265,14 +275,22 @@ const SpeedTypingGame = ({ songData }: { songData: any}) => {
             {(started && (Date.now() - startTime) < songData.Content.duration && (Date.now() - startTime) < songData["Content"]["yt_time"]) ? 
             <iframe width="0" height="0" src={`//www.youtube.com/embed/${songData["Content"]["yt_id"]}?autoplay=1&loop=1&playlist=${songData["Content"]["yt_id"]}`} allowFullScreen /> :
             <></>}
-            <div className="buttons flex flex-row justify-between">
-                <button className="btn" onClick={startGame}>Start</button>
-                <button className="btn" onClick={() => console.log("clicked")}>Reset</button>
+            <div className="buttons flex justify-center">
+                {(!started) ? 
+                    <button className="text-4xl p-4 m-2 text-white px-10 rounded-3xl" style={{background: "rgb(0, 78, 100)"}} onClick={startGame}>
+                        Start
+                    </button> : 
+                    <button className="text-4xl p-4 m-2 text-white px-10 rounded-3xl" style={{background: "rgb(0, 78, 100)"}} 
+                        onClick={() => window.location.reload()}
+                    >
+                        Reset
+                    </button>
+                }
             </div>
         </div>
         
     )
 }
 
-//             <SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>
+//<SongPlayer trackUri={urlToUri((document.getElementById("song-url") as HTMLInputElement).value)} playing={started}/>
 export default SpeedTypingGame

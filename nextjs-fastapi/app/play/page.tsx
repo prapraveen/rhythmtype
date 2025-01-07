@@ -35,8 +35,11 @@ export default function Home() {
 
 
     return (
-        <div className="App flex flex-col items-center">
-            <SongSearch />
+        <div className="App flex flex-col items-center mb-0">
+            <div className='banner absolute w-full' style={{background: "rgb(0, 78, 100)", height: "6rem"}}></div>
+            <div className="navbar flex justify-center py-3 absolute">
+                <SongSearch />
+            </div>
             {(songData) ? <SpeedTypingGame songData={songData}/> :
             <h2>Loading...</h2>}
         </div>
