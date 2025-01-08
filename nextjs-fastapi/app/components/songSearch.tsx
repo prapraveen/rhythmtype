@@ -16,7 +16,6 @@ export default function SongSearch() {
     const [search, setSearch] = useState("")
     const [searchResults, setSearchResults] = useState<any>([])
     const [accessToken, setAccessToken] = useState<null | string>(null)
-    console.log(searchResults)
 
     useEffect(() => {
         if (!user || user == "loading") return

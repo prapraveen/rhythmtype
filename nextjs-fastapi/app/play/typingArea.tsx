@@ -35,7 +35,7 @@ const TypingArea = ({
                     </div>
                     <div className="Progress text-right">
                         <p>Progress:</p>
-                        <span><b>{progress}</b></span>
+                        <span><b id="progress-text">{progress}</b></span>
                     </div>
             </div>
         </div>

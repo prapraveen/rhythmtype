@@ -68,7 +68,7 @@ input.input-field{
   width: 100%;
 }
 
-span{
+.text-container span{
   font-size: 40px;
   user-select: none;
   cursor: tex;

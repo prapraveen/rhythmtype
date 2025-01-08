@@ -5,13 +5,13 @@ import os
 from syrics.api import Spotify
 from dotenv import load_dotenv
 import time
-import pprint
 import pymongo
 import requests
 import base64
-import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from youtube_search import YoutubeSearch
+from datetime import date
+from pydantic import BaseModel
 
 load_dotenv()
 db_url = os.getenv("DB_URL")
@@ -175,22 +175,28 @@ def get_access_token(code: str):
     res["expires_at"] = int(time.time() * 1000) + res["expires_in"] * 1000
     return res
 
+class ScoreSubmission(BaseModel):
+    song_id: str
+    user_id: str
+    accuracy: float
 
-    
-    
-"""
-@app.get("/api/py/get-access-token")
-def get_access_token(auth_code: str):
-    response = requests.post(
-        "https://accounts.spotify.com/api/token",
-        data={
-            "grant_type": "authorization_code",
-            "code": auth_code,
-            "redirect_uri": "http://localhost:3000/play",
-        },
-        auth=(client_id, client_secret),
-    )
-    #return response.json()
-    access_token = response.json()["access_token"]
-    return {"Authorization": "Bearer " + access_token}
-"""
+@app.post("/api/py/submit-score")
+def submit_score(submission: ScoreSubmission):
+    scores_col = db["song_scores"]
+    user_scores = scores_col.find_one({"song_id": submission.song_id, "user_id": submission.user_id}, {'_id': 0})
+    scores_col.delete_one({"song_id": submission.song_id, "user_id": submission.user_id})
+    today = str(date.today().strftime("%d/%m/%Y"))
+    if not user_scores:
+        scores = []
+    else:
+        scores = user_scores["scores"]
+    scores.append({
+        "date": today,
+        "score": submission.accuracy
+    })
+    new_data = {"user_id": submission.user_id, 
+                "song_id": submission.song_id, 
+                "scores": scores}
+    scores_col.insert_one(new_data)
+    new_data.pop("_id", None)
+    return scores

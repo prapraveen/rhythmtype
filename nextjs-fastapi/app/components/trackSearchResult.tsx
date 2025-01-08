@@ -6,6 +6,7 @@ export default function TrackSearchResult({ track }: {track:any}) {
     const handlePlay = (e: any) => {
         e.preventDefault()
         router.push(`/play/?id=${track.id}`)
+        window.location.reload()
     }
 
     return <>
